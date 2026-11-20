@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PianoMaster — Aprende Piano Jugando</title>
+  <style>
+    :root {
+      --bg-dark: #0b1120;
+      --bg-card: #151e32;
+      --bg-panel: #1e293b;
+      --border: #334155;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #38bdf8;
+      /* Colores por dedo */
+      --f1: #ef4444; /* Pulgar - Rojo */
+      --f2: #f59e0b; /* Índice - Ámbar */
+      --f3: #10b981; /* Medio - Verde */
+      --f4: #3b82f6; /* Anular - Azul */
+      --f5: #a855f7; /* Meñique - Morado */
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: radial-gradient(circle at top, #172554 0%, var(--bg-dark) 55%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px;
+      gap: 14px;
+    }
+
+    /* Header & Nav */
+    header {
+      width: 100%;
+      max-width: 1100px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      background: rgba(21, 30, 50, 0.85);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border);
+      padding: 12px 20px;
+      border-radius: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand h1 {
+      font-size: 1.35rem;
+      background: linear-gradient(90deg, #38bdf8, #a855f7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: 800;
+    }
+
+    .nav-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .tab-btn {
+      background: var(--bg-panel);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-main);
+      border-color: var(--accent);
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(135deg, #0284c7, #6366f1);
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 4px 14px rgba(56, 189, 248, 0.35);
+    }
+
+    /* Main Layout */
+    .dashboard {
+      width: 100%;
+      max-width: 1100px;
+      display: grid;
+      grid-template-columns: 1fr 270px;
+      gap: 14px;
+    }
+
+    @media (max-width: 880px) {
+      .dashboard {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    /* Controls Bar */
+    .controls-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+
+    select, button.action-btn {
+      background: var(--bg-panel);
+      color: var(--text-main);
+      border: 1px solid var(--border);
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    button.action-btn:hover {
+      border-color: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    button.action-btn.primary {
+      background: #10b981;
+      border-color: #059669;
+      color: #022c22;
+    }
+
+    button.action-btn.danger {
+      background: #ef4444;
+      border-color: #dc2626;
+      color: #fff;
+    }
+
+    button.action-btn.secondary {
+      background: #3b82f6;
+      border-color: #2563eb;
+      color: #fff;
+    }
+
+    .stat-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-left: auto;
+    }
+
+    .pill {
+      background: var(--bg-dark);
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .pill span {
+      color: var(--accent);
+      font-weight: 800;
+    }
+
+    /* Prompt / Queue Display */
+    .stage-info {
+      background: var(--bg-dark);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      min-height: 112px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      gap: 8px;
+    }
+
+    .queue-strip {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .queue-card {
+      width: 68px;
+      padding: 8px 6px;
+      border-radius: 10px;
+      background: var(--bg-panel);
+      border: 2px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      opacity: 0.55;
+      transition: all 0.2s;
+    }
+
+    .queue-card.current {
+      opacity: 1;
+      transform: scale(1.1);
+      border-color: #fff;
+      box-shadow: 0 0 18px rgba(56, 189, 248, 0.4);
+    }
+
+    .queue-card .q-note {
+      font-size: 1.05rem;
+      font-weight: 800;
+    }
+
+    .finger-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: #fff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+    }
+
+    .fc-1 { background: var(--f1); }
+    .fc-2 { background: var(--f2); color: #111 !important; }
+    .fc-3 { background: var(--f3); color: #022c22 !important; }
+    .fc-4 { background: var(--f4); }
+    .fc-5 { background: var(--f5); }
+
+    /* Hand Visual Guide */
+    .hand-panel {
+      align-items: center;
+      text-align: center;
+    }
+
+    .hand-panel h3 {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .hand-svg {
+      width: 170px;
+      height: 145px;
+    }
+
+    .finger-shape {
+      fill: #334155;
+      stroke: #475569;
+      stroke-width: 2;
+      transition: all 0.15s ease;
+    }
+
+    .finger-label-svg {
+      fill: #e2e8f0;
+      font-size: 11px;
+      font-weight: 800;
+      text-anchor: middle;
+      pointer-events: none;
+    }
+
+    .finger-legend {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    /* Piano & Waterfall Container */
+    .piano-container {
+      width: 100%;
+      max-width: 1100px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 16px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    }
+
+    .piano-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .toggle-group {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .toggle-group label {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+    }
+
+    .piano-scroll {
+      width: 100%;
+      overflow-x: auto;
+      padding-bottom: 6px;
+    }
+
+    .piano-stage {
+      position: relative;
+      width: 100%;
+      min-width: 720px;
+    }
+
+    /* Rhythm Waterfall */
+    .waterfall {
+      position: relative;
+      width: 100%;
+      height: 230px;
+      background: linear-gradient(180deg, #090d16 0%, #111827 100%);
+      border-radius: 12px 12px 0 0;
+      border: 1px solid var(--border);
+      border-bottom: 3px solid var(--accent);
+      overflow: hidden;
+      display: none;
+    }
+
+    .waterfall.active {
+      display: block;
+    }
+
+    .waterfall-note {
+      position: absolute;
+      height: 34px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.85rem;
+      color: #fff;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+      border: 2px solid rgba(255, 255, 255, 0.45);
+      will-change: transform;
+    }
+
+    .hit-feedback {
+      position: absolute;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 1.3rem;
+      font-weight: 900;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s;
+      z-index: 20;
+    }
+
+    /* Piano Keyboard */
+    .piano-keys {
+      position: relative;
+      width: 100%;
+      height: 210px;
+      display: flex;
+      background: #020617;
+      padding: 6px 4px 8px;
+      border-radius: 0 0 12px 12px;
+    }
+
+    .piano-keys.standalone {
+      border-radius: 12px;
+    }
+
+    .key {
+      position: relative;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: center;
+      padding-bottom: 10px;
+      transition: background 0.08s, transform 0.08s;
+      touch-action: none;
+    }
+
+    .key.white {
+      flex: 1;
+      height: 100%;
+      background: linear-gradient(180deg, #ffffff 0%, #e2e8f0 100%);
+      border: 1px solid #94a3b8;
+      border-radius: 0 0 8px 8px;
+      margin: 0 1px;
+      color: #334155;
+      z-index: 1;
+      box-shadow: inset 0 -4px 0 #cbd5e1;
+    }
+
+    .key.white.pressed {
+      background: linear-gradient(180deg, #bae6fd 0%, #7dd3fc 100%);
+      transform: translateY(2px);
+      box-shadow: inset 0 -1px 0 #94a3b8;
+    }
+
+    .key.black {
+      position: absolute;
+      top: 6px;
+      width: 4%;
+      height: 60%;
+      background: linear-gradient(180deg, #334155 0%, #0f172a 100%);
+      border: 1px solid #020617;
+      border-radius: 0 0 6px 6px;
+      color: #cbd5e1;
+      z-index: 3;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6), inset 0 -3px 0 #000;
+    }
+
+    .key.black.pressed {
+      background: linear-gradient(180deg, #0284c7 0%, #0369a1 100%);
+      transform: translateY(2px);
+    }
+
+    .key.wrong {
+      background: #ef4444 !important;
+      color: #fff !important;
+    }
+
+    /* Target highlights on keys */
+    .key.target {
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.8), inset 0 0 12px rgba(255, 255, 255, 0.5);
+    }
+    .key.target.f1 { background: linear-gradient(180deg, #fecaca, var(--f1)) !important; color: #fff; }
+    .key.target.f2 { background: linear-gradient(180deg, #fde68a, var(--f2)) !important; color: #111; }
+    .key.target.f3 { background: linear-gradient(180deg, #a7f3d0, var(--f3)) !important; color: #022c22; }
+    .key.target.f4 { background: linear-gradient(180deg, #bfdbfe, var(--f4)) !important; color: #fff; }
+    .key.target.f5 { background: linear-gradient(180deg, #e9d5ff, var(--f5)) !important; color: #fff; }
+
+    .key-finger-tag {
+      position: absolute;
+      top: 10px;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 0.9rem;
+      color: #fff;
+      background: rgba(15, 23, 42, 0.85);
+      border: 2px solid #fff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+    }
+
+    .key.black .key-finger-tag {
+      top: auto;
+      bottom: 34px;
+      width: 22px;
+      height: 22px;
+      font-size: 0.78rem;
+    }
+
+    .key.target .key-finger-tag {
+      display: flex;
+      animation: pulse 0.9s infinite alternate;
+    }
+
+    @keyframes pulse {
+      from { transform: scale(1); }
+      to { transform: scale(1.15); }
+    }
+
+    .key-note-label {
+      font-size: 0.72rem;
+      font-weight: 800;
+      pointer-events: none;
+    }
+
+    .key.black .key-note-label {
+      font-size: 0.6rem;
+      margin-bottom: 2px;
+    }
+
+    .key-kbd-label {
+      font-size: 0.65rem;
+      opacity: 0.65;
+      margin-top: 2px;
+      background: rgba(148, 163, 184, 0.2);
+      padding: 1px 4px;
+      border-radius: 4px;
+      pointer-events: none;
+    }
+
+    .hide-notes .key-note-label { display: none; }
+    .hide-kbd .key-kbd-label { display: none; }
+
+    .big-prompt {
+      font-size: 1.45rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .sub-prompt {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <span style="font-size:1.7rem;">🎹</span>
+      <div>
+        <h1>PianoMaster</h1>
+        <div style="font-size:0.75rem; color:var(--text-muted);">Aprende notas, digitación y canciones</div>
+      </div>
+    </div>
+    <div class="nav-tabs">
+      <button class="tab-btn active" data-mode="free">🎹 Práctica Libre</button>
+      <button class="tab-btn" data-mode="learn">🎵 Aprender Canciones</button>
+      <button class="tab-btn" data-mode="rhythm">🎮 Juego: Lluvia Musical</button>
+      <button class="tab-btn" data-mode="quiz">⚡ Juego: Desafío Notas</button>
+    </div>
+  </header>
+
+  <section class="dashboard">
+    <!-- Panel izquierdo: Controles y Estado -->
+    <div class="panel">
+      <div class="controls-row" id="modeControls">
+        <!-- Se llena dinámicamente según el modo -->
+      </div>
+
+      <div class="stage-info" id="stageInfo">
+        <!-- Prompt dinámico -->
+      </div>
+    </div>
+
+    <!-- Panel derecho: Guía visual de Mano y Dedos -->
+    <div class="panel hand-panel">
+      <h3>Guía de Dedos (Mano Derecha)</h3>
+      <svg class="hand-svg" viewBox="0 0 200 170">
+        <!-- Palma -->
+        <path d="M55,105 Q50,155 100,158 Q148,158 145,105 L140,85 L60,85 Z" fill="#1e293b" stroke="#475569" stroke-width="2"/>
+        <!-- Dedo 1: Pulgar -->
+        <g id="svg-finger-1">
+          <rect x="26" y="88" width="22" height="52" rx="11" transform="rotate(-38 37 114)" class="finger-shape" />
+          <text x="33" y="106" class="finger-label-svg">1</text>
+        </g>
+        <!-- Dedo 2: Índice -->
+        <g id="svg-finger-2">
+          <rect x="58" y="25" width="20" height="65" rx="10" class="finger-shape" />
+          <text x="68" y="47" class="finger-label-svg">2</text>
+        </g>
+        <!-- Dedo 3: Medio -->
+        <g id="svg-finger-3">
+          <rect x="84" y="12" width="20" height="76" rx="10" class="finger-shape" />
+          <text x="94" y="34" class="finger-label-svg">3</text>
+        </g>
+        <!-- Dedo 4: Anular -->
+        <g id="svg-finger-4">
+          <rect x="110" y="22" width="20" height="68" rx="10" class="finger-shape" />
+          <text x="120" y="44" class="finger-label-svg">4</text>
+        </g>
+        <!-- Dedo 5: Meñique -->
+        <g id="svg-finger-5">
+          <rect x="135" y="42" width="18" height="52" rx="9" class="finger-shape" />
+          <text x="144" y="62" class="finger-label-svg">5</text>
+        </g>
+      </svg>
+      <div class="finger-legend">
+        <div class="legend-item"><span class="legend-dot fc-1"></span>1:Pulgar</div>
+        <div class="legend-item"><span class="legend-dot fc-2"></span>2:Índice</div>
+        <div class="legend-item"><span class="legend-dot fc-3"></span>3:Medio</div>
+        <div class="legend-item"><span class="legend-dot fc-4"></span>4:Anular</div>
+        <div class="legend-item"><span class="legend-dot fc-5"></span>5:Meñique</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Piano & Waterfall -->
+  <section class="piano-container">
+    <div class="piano-toolbar">
+      <div>💡 Puedes tocar con <b>ratón, pantalla táctil</b> o el <b>teclado de tu PC</b> (Z–M y Q–I).</div>
+      <div class="toggle-group">
+        <label><input type="checkbox" id="toggleNotes" checked /> Mostrar Notas</label>
+        <label><input type="checkbox" id="toggleKbd" checked /> Mostrar Teclas PC</label>
+      </div>
+    </div>
+
+    <div class="piano-scroll">
+      <div class="piano-stage" id="pianoStage">
+        <div class="waterfall" id="waterfall">
+          <div class="hit-feedback" id="hitFeedback"></div>
+        </div>
+        <div class="piano-keys standalone" id="pianoKeys"></div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    /*************************************************************
+     * 1. DATOS MUSICALES Y TECLADO (Do4 a Do6 = 25 Teclas)
+     *************************************************************/
+    const FINGER_NAMES = {
+      1: 'Pulgar',
+      2: 'Índice',
+      3: 'Medio',
+      4: 'Anular',
+      5: 'Meñique'
+    };
+
+    const FINGER_COLORS = {
+      1: '#ef4444',
+      2: '#f59e0b',
+      3: '#10b981',
+      4: '#3b82f6',
+      5: '#a855f7'
+    };
+
+    // Notas ordenadas cronológicamente (MIDI 60 = C4 a MIDI 84 = C6)
+    const KEYS_DATA = [
+      { note: 'C4',  es: 'Do4',  midi: 60, type: 'white', kbd: 'Z', whiteIdx: 0 },
+      { note: 'C#4', es: 'Do#4', midi: 61, type: 'black', kbd: 'S', afterWhite: 0 },
+      { note: 'D4',  es: 'Re4',  midi: 62, type: 'white', kbd: 'X', whiteIdx: 1 },
+      { note: 'D#4', es: 'Re#4', midi: 63, type: 'black', kbd: 'D', afterWhite: 1 },
+      { note: 'E4',  es: 'Mi4',  midi: 64, type: 'white', kbd: 'C', whiteIdx: 2 },
+      { note: 'F4',  es: 'Fa4',  midi: 65, type: 'white', kbd: 'V', whiteIdx: 3 },
+      { note: 'F#4', es: 'Fa#4', midi: 66, type: 'black', kbd: 'G', afterWhite: 3 },
+      { note: 'G4',  es: 'Sol4', midi: 67, type: 'white', kbd: 'B', whiteIdx: 4 },
+      { note: 'G#4', es: 'Sol#4',midi: 68, type: 'black', kbd: 'H', afterWhite: 4 },
+      { note: 'A4',  es: 'La4',  midi: 69, type: 'white', kbd: 'N', whiteIdx: 5 },
+      { note: 'A#4', es: 'La#4', midi: 70, type: 'black', kbd: 'J', afterWhite: 5 },
+      { note: 'B4',  es: 'Si4',  midi: 71, type: 'white', kbd: 'M', whiteIdx: 6 },
+
+      { note: 'C5',  es: 'Do5',  midi: 72, type: 'white', kbd: 'Q', whiteIdx: 7 },
+      { note: 'C#5', es: 'Do#5', midi: 73, type: 'black', kbd: '2', afterWhite: 7 },
+      { note: 'D5',  es: 'Re5',  midi: 74, type: 'white', kbd: 'W', whiteIdx: 8 },
+      { note: 'D#5', es: 'Re#5', midi: 75, type: 'black', kbd: '3', afterWhite: 8 },
+      { note: 'E5',  es: 'Mi5',  midi: 76, type: 'white', kbd: 'E', whiteIdx: 9 },
+      { note: 'F5',  es: 'Fa5',  midi: 77, type: 'white', kbd: 'R', whiteIdx: 10 },
+      { note: 'F#5', es: 'Fa#5', midi: 78, type: 'black', kbd: '5', afterWhite: 10 },
+      { note: 'G5',  es: 'Sol5', midi: 79, type: 'white', kbd: 'T', whiteIdx: 11 },
+      { note: 'G#5', es: 'Sol#5',midi: 80, type: 'black', kbd: '6', afterWhite: 11 },
+      { note: 'A5',  es: 'La5',  midi: 81, type: 'white', kbd: 'Y', whiteIdx: 12 },
+      { note: 'A#5', es: 'La#5', midi: 82, type: 'black', kbd: '7', afterWhite: 12 },
+      { note: 'B5',  es: 'Si5',  midi: 83, type: 'white', kbd: 'U', whiteIdx: 13 },
+      { note: 'C6',  es: 'Do6',  midi: 84, type: 'white', kbd: 'I', whiteIdx: 14 }
+    ];
+
+    const NOTE_MAP = Object.fromEntries(KEYS_DATA.map(k => [k.note, k]));
+    const KBD_MAP = Object.fromEntries(KEYS_DATA.map(k => [k.kbd.toLowerCase(), k.note]));
+
+    /*************************************************************
+     * 2. BIBLIOTECA DE CANCIONES CON DIGITACIÓN REAL (d = duración en beats)
+     *************************************************************/
+    const SONGS = {
+      ode: {
+        title: 'Himno a la Alegría (Beethoven)',
+        level: 'Principiante',
+        bpm: 105,
+        notes: [
+          { note: 'E4', finger: 3, d: 1 }, { note: 'E4', finger: 3, d: 1 }, { note: 'F4', finger: 4, d: 1 }, { note: 'G4', finger: 5, d: 1 },
+          { note: 'G4', finger: 5, d: 1 }, { note: 'F4', finger: 4, d: 1 }, { note: 'E4', finger: 3, d: 1 }, { note: 'D4', finger: 2, d: 1 },
+          { note: 'C4', finger: 1, d: 1 }, { note: 'C4', finger: 1, d: 1 }, { note: 'D4', finger: 2, d: 1 }, { note: 'E4
